@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { render } from "react-dom";
 import { Stage, Layer, Text, Image, Group } from "react-konva";
 import useImage from "use-image";
@@ -17,8 +17,6 @@ const MASK_LAYER = {
 };
 
 const App = () => {
-  const imageRef = React.useRef();
-  let ui;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   const [stage, setStage] = useState({
@@ -27,44 +25,8 @@ const App = () => {
     y: 0
   });
   const [isDragging, setIsDragging] = useState(false);
-  // const [image] = useImage(userImage);
-  const [image, setImage] = useState(null);
-
+  const [image] = useImage(userImage);
   const [mask] = useImage(imageMask);
-  // const [image] = useImage('https://konvajs.org/assets/lion.png');
-
-  const handleLoad = useCallback(() => {
-    // if (!image) return;
-    setImage(imageRef.current);
-  }, []);
-  // const loadImage = useCallback(() => {
-  //   ui = new window.Image();
-  //   ui.src = userImage;
-  //   ui.addEventListener("load", handleLoad);
-  // }, [handleLoad]);
-  useEffect(() => {
-    const img = new window.Image();
-    img.src = userImage;
-    // img.crossOrigin="Anonymous";
-    imageRef.current = img;
-    imageRef.current.addEventListener("load", handleLoad);
-
-    return () => {
-      if (imageRef.current) {
-        imageRef.current.removeEventListener("load", handleLoad);
-      }
-    };
-  }, [handleLoad]);
-
-  // useEffect(() => {
-  //   loadImage();
-  // }, [loadImage]);
-
-  // useEffect(() => {
-  //   if (image) {
-  //     console.log('image', imageRef.current.width());
-  //   }
-  // }, [image]);
 
   const onDragStart = () => setIsDragging(true);
   const onDragEnd = (e) => {
@@ -116,15 +78,11 @@ const App = () => {
             draggable
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
-            ref={imageRef}
-            // width={USER_IMAGE_LAYER.width}
-            // hight={USER_IMAGE_LAYER.hight}
+            width={USER_IMAGE_LAYER.width}
+            hight={USER_IMAGE_LAYER.hight}
           />
         </Group>
-        <Group
-          globalCompositeOperation="destination-in"
-          // globalCompositeOperation="lighter"
-        >
+        <Group globalCompositeOperation="destination-in">
           <Image
             image={mask}
             x={x}
