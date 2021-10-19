@@ -1,0 +1,22 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.zoomButtonContainer {
+  display: flex;
+  justify-content: center;
+  /* height: 180; */
+  align-items: center;
+  align-self: stretch;
+  margin-top: 50px;
+}
+.zoomButton {
+  margin: 10px;
+  font-size: 22px;
+  height: 30px;
+  width: 30px;
+}
+.zoomButton:hover {
+  cursor: pointer;
+}

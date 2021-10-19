@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { render } from "react-dom";
-import { Stage, Layer, Text, Image, Group } from "react-konva";
+import { Stage, Layer, Image } from "react-konva";
 import useImage from "use-image";
 
+import "./style.css";
 import imageMask from "./mask-circle.png";
 import userImage from "./UI-Lovecraft.jpg";
 
@@ -15,6 +16,7 @@ const MASK_LAYER = {
   width: 624,
   height: 591
 };
+const scaleBy = 1.02;
 
 const App = () => {
   const [x, setX] = useState(0);
@@ -28,21 +30,29 @@ const App = () => {
   const [image] = useImage(userImage);
   const [mask] = useImage(imageMask);
 
+  useEffect(() => {
+    if (!image) return;
+    let defaultZoom;
+
+    if (image.naturalHeight >= image.naturalWidth) {
+      defaultZoom = USER_IMAGE_LAYER.width / image.naturalWidth;
+    } else {
+      defaultZoom = USER_IMAGE_LAYER.height / image.naturalHeight;
+    }
+    setStage((prev) => ({ ...prev, scale: defaultZoom }));
+  }, [image]);
+
   const onDragStart = () => setIsDragging(true);
   const onDragEnd = (e) => {
     setIsDragging(true);
     setX(e.target.x());
     setY(e.target.y());
-    // console.log({ x: e.target.x(), y: e.target.y(), })
-    console.log(stage.scale);
-    // console.log(e.target.width())
+    console.log({ x: e.target.x(), y: e.target.y() });
   };
-  // console.log(image.width)
 
   const handleWheel = (e) => {
     e.evt.preventDefault();
 
-    const scaleBy = 1.02;
     const stage = e.target.getStage();
     const oldScale = stage.scaleX();
     const mousePointTo = {
@@ -59,18 +69,31 @@ const App = () => {
     });
   };
 
+  const SimulateMouseWheel = (e, BtnType, mScale = scaleBy) => {
+    const newScale = BtnType > 0 ? stage.scale * mScale : stage.scale / mScale;
+    setStage((prev) => ({ ...prev, scale: newScale }));
+  };
+
+  const onClickPlus = (e) => {
+    SimulateMouseWheel(e, +1);
+  };
+
+  const onClickMinus = (e) => {
+    SimulateMouseWheel(e, -1);
+  };
+
   return (
-    <Stage
-      width={USER_IMAGE_LAYER.width}
-      height={USER_IMAGE_LAYER.height}
-      onWheel={handleWheel}
-      scaleX={stage.scale}
-      scaleY={stage.scale}
-      x={stage.x}
-      y={stage.y}
-    >
-      <Layer>
-        <Group>
+    <div className="container">
+      <Stage
+        width={USER_IMAGE_LAYER.width}
+        height={USER_IMAGE_LAYER.height}
+        // onWheel={handleWheel}
+        // scaleX={stage.scale}
+        // scaleY={stage.scale}
+        x={stage.x}
+        y={stage.y}
+      >
+        <Layer>
           <Image
             image={image}
             x={x}
@@ -78,21 +101,30 @@ const App = () => {
             draggable
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
-            width={USER_IMAGE_LAYER.width}
-            hight={USER_IMAGE_LAYER.hight}
+            scaleX={stage.scale}
+            scaleY={stage.scale}
           />
-        </Group>
-        <Group globalCompositeOperation="destination-in">
           <Image
             image={mask}
-            x={x}
-            y={y}
+            x={0}
+            y={0}
             width={MASK_LAYER.width}
             height={MASK_LAYER.height}
+            verticalAlign="middle"
+            globalCompositeOperation="destination-in"
+            listening={false}
           />
-        </Group>
-      </Layer>
-    </Stage>
+        </Layer>
+      </Stage>
+      <div className="zoomButtonContainer">
+        <button className="zoomButton" onClick={onClickMinus}>
+          -
+        </button>
+        <button className="zoomButton" onClick={onClickPlus}>
+          +
+        </button>
+      </div>
+    </div>
   );
 };
 
