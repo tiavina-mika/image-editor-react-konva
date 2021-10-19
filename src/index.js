@@ -94,6 +94,7 @@ const App = () => {
         y={stage.y}
       >
         <Layer>
+          {/* --------- user image ---------  */}
           <Image
             image={image}
             x={x}
@@ -104,13 +105,13 @@ const App = () => {
             scaleX={stage.scale}
             scaleY={stage.scale}
           />
+          {/* --------- mask ---------  */}
           <Image
             image={mask}
             x={0}
             y={0}
             width={MASK_LAYER.width}
             height={MASK_LAYER.height}
-            verticalAlign="middle"
             globalCompositeOperation="destination-in"
             listening={false}
           />
