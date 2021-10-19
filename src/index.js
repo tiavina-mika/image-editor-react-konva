@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { render } from "react-dom";
-import { Stage, Layer, Image } from "react-konva";
+import { Stage, Layer, Image, Group, Rect } from "react-konva";
 import useImage from "use-image";
 
 import "./style.css";
@@ -104,6 +104,7 @@ const App = () => {
             onDragEnd={onDragEnd}
             scaleX={stage.scale}
             scaleY={stage.scale}
+            // opacity={0.1}
           />
           {/* --------- mask ---------  */}
           <Image
@@ -112,9 +113,22 @@ const App = () => {
             y={0}
             width={MASK_LAYER.width}
             height={MASK_LAYER.height}
-            globalCompositeOperation="destination-in"
+            globalCompositeOperation="multiply"
+            opacity={0.1}
             listening={false} // equivalent to pointer events: none
           />
+          {/* <Rect
+              x={0}
+              y={0}
+              // draggable
+              fill='#fff'
+              opacity={1}
+              width={USER_IMAGE_LAYER.width}
+              height={USER_IMAGE_LAYER.height}
+              listening={false}
+              globalCompositeOperation="luminosity"
+              // shadowBlur={5}
+            /> */}
         </Layer>
       </Stage>
       <div className="zoomButtonContainer">
