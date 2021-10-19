@@ -113,7 +113,7 @@ const App = () => {
             width={MASK_LAYER.width}
             height={MASK_LAYER.height}
             globalCompositeOperation="destination-in"
-            listening={false}
+            listening={false} // equivalent to pointer events: none
           />
         </Layer>
       </Stage>
