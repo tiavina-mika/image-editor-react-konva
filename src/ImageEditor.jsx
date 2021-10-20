@@ -17,7 +17,19 @@ const MASK_LAYER = {
   height: 591
 };
 const step = 0.1;
+const getCroppedValues = ({ image, zoom, x, y }) => {
+  const zoomedImageWidth = image.width * zoom;
+  const zoomedImageHeight = image.height * zoom;
 
+  const imageBounds = {
+    imageLeft: x * zoom,
+    imageTop: y * zoom,
+    imageWidth: zoomedImageWidth,
+    imageHeight: zoomedImageHeight
+  };
+
+  return imageBounds;
+};
 /**
  * create another canvas to invert the mask color
  * @param {*} image
@@ -77,12 +89,27 @@ const ImageEditor = () => {
     setZoom(defaultZoom);
   }, [image]);
 
+  const croppedValue = useMemo(() => {
+    if (!image) return;
+    const zoomedImageWidth = image.naturalWidth * zoom;
+    const zoomedImageHeight = image.naturalHeight * zoom;
+
+    const imageBounds = {
+      imageLeft: x * zoom,
+      imageTop: y * zoom,
+      imageWidth: zoomedImageWidth,
+      imageHeight: zoomedImageHeight
+    };
+
+    return imageBounds;
+  }, [image, zoom, x, y]);
+
   const onDragEnd = (e) => {
     setX(e.target.x());
     setY(e.target.y());
-    console.log({ x: e.target.x(), y: e.target.y() });
+    // console.log({ x: e.target.x(), y: e.target.y() });
   };
-  console.log({ x, y });
+  console.log("croppedValue", croppedValue);
 
   const handleWheel = (e) => {
     e.evt.preventDefault();
@@ -121,6 +148,7 @@ const ImageEditor = () => {
   const onMouseLeave = (event) => {
     event.target.getStage().container().style.cursor = "default";
   };
+
   return (
     <div className="container flexCenter">
       <Stage
