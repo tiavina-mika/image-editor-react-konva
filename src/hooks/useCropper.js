@@ -28,7 +28,7 @@ const invertMask = (image) => {
   return canvas;
 };
 
-export const useCropper = ({ image, mask, layer }) => {
+export const useCropper = ({ image, imageMask, layer }) => {
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
 
@@ -36,18 +36,18 @@ export const useCropper = ({ image, mask, layer }) => {
   const [minZoom, setMinZoom] = useState(1);
   // Anonymous as crossOrigin to be able to do getImageData on it
   // const [image] = useImage(userImage, "Anonymous");
-  // const [mask] = useImage(imageMask, "Anonymous");
+  // const [imageMask] = useImage(imageMask, "Anonymous");
   const invertedMaskRef = useRef();
   const imageRef = useRef();
 
-  const complete = !!mask?.complete;
+  const complete = !!imageMask?.complete;
   useMemo(() => {
-    if (!mask) return;
+    if (!imageMask) return;
     // console.log("complete", complete);
     if (complete) {
-      invertedMaskRef.current = invertMask(mask);
+      invertedMaskRef.current = invertMask(imageMask);
     }
-  }, [complete, mask]);
+  }, [complete, imageMask]);
 
   useEffect(() => {
     if (!image) return;

@@ -3,7 +3,7 @@ import { Stage, Layer, Image } from "react-konva";
 import useImage from "use-image";
 
 import "./style.css";
-import imageMask from "./mask-circle.png";
+import mask from "./mask-circle.png";
 import userImage from "./UI-Lovecraft.jpg";
 import Slider from "./Slider";
 import { useCropper, ZOOM_STEP } from "./hooks/useCropper";
@@ -21,7 +21,7 @@ const MASK_LAYER = {
 const ImageEditor = () => {
   // Anonymous as crossOrigin to be able to do getImageData on it
   const [image] = useImage(userImage, "Anonymous");
-  const [mask] = useImage(imageMask, "Anonymous");
+  const [imageMask] = useImage(mask, "Anonymous");
 
   const {
     setZoom,
@@ -34,7 +34,7 @@ const ImageEditor = () => {
     y,
     imageRef,
     invertedMaskRef
-  } = useCropper({ image, mask, layer: USER_IMAGE_LAYER });
+  } = useCropper({ image, imageMask, layer: USER_IMAGE_LAYER });
 
   console.log(croppedValue);
   const onMouseEnter = (event) => {
