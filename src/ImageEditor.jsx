@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { render } from "react-dom";
-import { Stage, Layer, Image, Group, Rect } from "react-konva";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { Stage, Layer, Image } from "react-konva";
 import useImage from "use-image";
 
 import "./style.css";
 import imageMask from "./mask-circle.png";
 import userImage from "./UI-Lovecraft.jpg";
+import Slider from "./Slider";
 
 const USER_IMAGE_LAYER = {
   width: 624,
@@ -17,8 +17,35 @@ const MASK_LAYER = {
   height: 591
 };
 const scaleBy = 1.02;
+const step = 0.1;
 
-const App = () => {
+/**
+ * create another canvas to invert the mask color
+ * @param {*} image
+ */
+const invertMask = (image) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = image.width;
+  canvas.height = image.height;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(image, 0, 0, image.width, image.height);
+
+  const imageData = ctx.getImageData(0, 0, image.width, image.height);
+  const data = imageData.data;
+
+  for (let i = 0, n = data.length; i < n; i += 4) {
+    data[i] = 0; // red
+    data[i + 1] = 0; // green
+    data[i + 2] = 0; // blue
+    data[i + 3] = 255 - data[i + 3]; // alpha
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  return canvas;
+};
+
+const ImageEditor = () => {
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   const [stage, setStage] = useState({
@@ -27,8 +54,21 @@ const App = () => {
     y: 0
   });
   const [isDragging, setIsDragging] = useState(false);
-  const [image] = useImage(userImage);
-  const [mask] = useImage(imageMask);
+  const [zoom, setZoom] = useState(1);
+  const [minZoom, setMinZoom] = useState(1);
+  // Anonymous as crossOrigin to be able to do getImageData on it
+  const [image] = useImage(userImage, "Anonymous");
+  const [mask] = useImage(imageMask, "Anonymous");
+  const invertedMask = useRef();
+  const imageRef = useRef();
+
+  const complete = !!mask?.complete;
+  useMemo(() => {
+    // console.log("complete", complete);
+    if (complete) {
+      invertedMask.current = invertMask(mask);
+    }
+  }, [complete, mask]);
 
   useEffect(() => {
     if (!image) return;
@@ -39,7 +79,9 @@ const App = () => {
     } else {
       defaultZoom = USER_IMAGE_LAYER.height / image.naturalHeight;
     }
-    setStage((prev) => ({ ...prev, scale: defaultZoom }));
+    // setStage((prev) => ({ ...prev, scale: defaultZoom }));
+    setMinZoom(defaultZoom);
+    setZoom(defaultZoom);
   }, [image]);
 
   const onDragStart = () => setIsDragging(true);
@@ -53,94 +95,72 @@ const App = () => {
   const handleWheel = (e) => {
     e.evt.preventDefault();
 
-    const stage = e.target.getStage();
-    const oldScale = stage.scaleX();
-    const mousePointTo = {
-      x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
-      y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
-    };
-
-    const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
-    setStage({
-      scale: newScale,
-      x: (stage.getPointerPosition().x / newScale - mousePointTo.x) * newScale,
-      y: (stage.getPointerPosition().y / newScale - mousePointTo.y) * newScale
-    });
+    const imageNode = imageRef.current;
+    const imageZoom = imageNode.scaleX();
+    const newZoom = e.evt.deltaY < 0 ? imageZoom + step : imageZoom - step;
+    if (newZoom < minZoom) return;
+    setZoom(newZoom);
   };
 
-  const SimulateMouseWheel = (e, BtnType, mScale = scaleBy) => {
-    const newScale = BtnType > 0 ? stage.scale * mScale : stage.scale / mScale;
-    setStage((prev) => ({ ...prev, scale: newScale }));
+  const onZoomChange = (value) => {
+    setZoom(value);
+  };
+  const onMouseEnter = (event) => {
+    event.target.getStage().container().style.cursor = "move";
   };
 
-  const onClickPlus = (e) => {
-    SimulateMouseWheel(e, +1);
+  const onMouseLeave = (event) => {
+    event.target.getStage().container().style.cursor = "default";
   };
-
-  const onClickMinus = (e) => {
-    SimulateMouseWheel(e, -1);
-  };
-
   return (
     <div className="container">
       <Stage
         width={USER_IMAGE_LAYER.width}
         height={USER_IMAGE_LAYER.height}
-        // onWheel={handleWheel}
-        // scaleX={stage.scale}
-        // scaleY={stage.scale}
-        x={stage.x}
-        y={stage.y}
+        onWheel={handleWheel}
+        x={0}
+        y={0}
       >
         <Layer>
           {/* --------- user image ---------  */}
           <Image
+            ref={imageRef}
             image={image}
             x={x}
             y={y}
             draggable
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
-            scaleX={stage.scale}
-            scaleY={stage.scale}
-            // opacity={0.1}
+            scaleX={zoom}
+            scaleY={zoom}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
           />
           {/* --------- mask ---------  */}
           <Image
-            image={mask}
+            image={invertedMask.current}
             x={0}
             y={0}
             width={MASK_LAYER.width}
             height={MASK_LAYER.height}
-            globalCompositeOperation="multiply"
-            opacity={0.1}
+            globalCompositeOperation="normal"
+            opacity={0.7}
             listening={false} // equivalent to pointer events: none
           />
-          {/* <Rect
-              x={0}
-              y={0}
-              // draggable
-              fill='#fff'
-              opacity={1}
-              width={USER_IMAGE_LAYER.width}
-              height={USER_IMAGE_LAYER.height}
-              listening={false}
-              globalCompositeOperation="luminosity"
-              // shadowBlur={5}
-            /> */}
         </Layer>
       </Stage>
-      <div className="zoomButtonContainer">
-        <button className="zoomButton" onClick={onClickMinus}>
-          -
-        </button>
-        <button className="zoomButton" onClick={onClickPlus}>
-          +
-        </button>
+      <div className="flexCenter m-t-20 m-b-10">
+        <Slider
+          step={step}
+          onChange={onZoomChange}
+          defaultValue={minZoom}
+          value={zoom}
+          min={minZoom}
+          max={3}
+        />
       </div>
     </div>
   );
 };
 
-render(<App />, document.getElementById("root"));
+export default ImageEditor;
