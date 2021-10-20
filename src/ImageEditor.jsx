@@ -89,16 +89,15 @@ const ImageEditor = () => {
     setZoom(defaultZoom);
   }, [image]);
 
+  // get the last updated cropped image value
   const croppedValue = useMemo(() => {
     if (!image) return;
-    const zoomedImageWidth = image.naturalWidth * zoom;
-    const zoomedImageHeight = image.naturalHeight * zoom;
 
     const imageBounds = {
       imageLeft: x * zoom,
       imageTop: y * zoom,
-      imageWidth: zoomedImageWidth,
-      imageHeight: zoomedImageHeight
+      imageWidth: image.naturalWidth * zoom,
+      imageHeight: image.naturalHeight * zoom
     };
 
     return imageBounds;
