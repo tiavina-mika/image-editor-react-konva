@@ -16,7 +16,6 @@ const MASK_LAYER = {
   width: 624,
   height: 591
 };
-const scaleBy = 1.02;
 const step = 0.1;
 
 /**
@@ -48,12 +47,7 @@ const invertMask = (image) => {
 const ImageEditor = () => {
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
-  const [stage, setStage] = useState({
-    scale: 1,
-    x: 0,
-    y: 0
-  });
-  const [isDragging, setIsDragging] = useState(false);
+
   const [zoom, setZoom] = useState(1);
   const [minZoom, setMinZoom] = useState(1);
   // Anonymous as crossOrigin to be able to do getImageData on it
@@ -79,36 +73,51 @@ const ImageEditor = () => {
     } else {
       defaultZoom = USER_IMAGE_LAYER.height / image.naturalHeight;
     }
-    // setStage((prev) => ({ ...prev, scale: defaultZoom }));
     setMinZoom(defaultZoom);
     setZoom(defaultZoom);
   }, [image]);
 
-  const onDragStart = () => setIsDragging(true);
   const onDragEnd = (e) => {
-    setIsDragging(true);
     setX(e.target.x());
     setY(e.target.y());
     console.log({ x: e.target.x(), y: e.target.y() });
   };
+  console.log({ x, y });
 
   const handleWheel = (e) => {
     e.evt.preventDefault();
+    const stage = e.target.getStage();
 
     const imageNode = imageRef.current;
     const imageZoom = imageNode.scaleX();
-    const newZoom = e.evt.deltaY < 0 ? imageZoom + step : imageZoom - step;
+
+    // wheel down = zoom+, wheel up = zoom-
+    const newZoom = e.evt.deltaY > 0 ? imageZoom + step : imageZoom - step;
+
     if (newZoom < minZoom) return;
     setZoom(newZoom);
+
+    // always center the image when zooming
+    const mousePointTo = {
+      x: stage.getPointerPosition().x / imageZoom - imageNode.x() / imageZoom,
+      y: stage.getPointerPosition().y / imageZoom - imageNode.y() / imageZoom
+    };
+
+    const newX =
+      (stage.getPointerPosition().x / newZoom - mousePointTo.x) * newZoom;
+    const newY =
+      (stage.getPointerPosition().y / newZoom - mousePointTo.y) * newZoom;
+    setX(newX);
+    setY(newY);
   };
 
   const onZoomChange = (value) => {
     setZoom(value);
   };
+
   const onMouseEnter = (event) => {
     event.target.getStage().container().style.cursor = "move";
   };
-
   const onMouseLeave = (event) => {
     event.target.getStage().container().style.cursor = "default";
   };
@@ -129,7 +138,6 @@ const ImageEditor = () => {
             x={x}
             y={y}
             draggable
-            onDragStart={onDragStart}
             onDragEnd={onDragEnd}
             scaleX={zoom}
             scaleY={zoom}
