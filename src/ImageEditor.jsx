@@ -122,13 +122,14 @@ const ImageEditor = () => {
     event.target.getStage().container().style.cursor = "default";
   };
   return (
-    <div className="container">
+    <div className="container flexCenter">
       <Stage
         width={USER_IMAGE_LAYER.width}
         height={USER_IMAGE_LAYER.height}
         onWheel={handleWheel}
         x={0}
         y={0}
+        // style={{ backgroundColor: 'rgba(0, 0, 0, 0.8'}}
       >
         <Layer>
           {/* --------- user image ---------  */}
