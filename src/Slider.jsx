@@ -45,7 +45,8 @@ const Slider = ({
   max,
   formatter,
   step = 1,
-  defaultValue
+  defaultValue,
+  ...props
 }) => {
   const theme = useTheme();
   return (
@@ -60,6 +61,7 @@ const Slider = ({
       defaultValue={defaultValue}
       value={value}
       onChange={onChange}
+      {...props}
     />
   );
 };

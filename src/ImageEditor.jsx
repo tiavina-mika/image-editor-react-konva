@@ -98,6 +98,7 @@ const ImageEditor = () => {
           value={zoom}
           min={minZoom}
           max={ZOOM_MAX}
+          tooltipVisible={false}
         />
       </div>
     </div>
