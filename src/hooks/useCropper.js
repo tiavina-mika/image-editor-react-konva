@@ -52,9 +52,6 @@ export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
 
   const [zoom, setZoom] = useState(1);
   const [minZoom, setMinZoom] = useState(1);
-  // Anonymous as crossOrigin to be able to do getImageData on it
-  // const [image] = useImage(userImage, "Anonymous");
-  // const [imageMask] = useImage(imageMask, "Anonymous");
   const invertedMaskRef = useRef();
   const imageRef = useRef();
   const stageRef = useRef();
@@ -62,7 +59,6 @@ export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
   const complete = !!imageMask?.complete;
   useMemo(() => {
     if (!imageMask) return;
-    // console.log("complete", complete);
     if (complete) {
       invertedMaskRef.current = invertMask(imageMask);
     }
@@ -79,7 +75,27 @@ export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
     }
     setMinZoom(defaultZoom);
     setZoom(defaultZoom);
-  }, [image, layer]);
+
+    const containerWidth = maskLayer ? maskLayer.width : layer.width();
+    const containerHeight = maskLayer ? maskLayer.height : layer.width();
+
+    const mousePointTo = {
+      x: containerWidth / 2 - image.x,
+      y: containerHeight / 2 - image.y
+    };
+
+    // center horizontaly
+    if (image.naturalHeight <= image.naturalWidth) {
+      const newX =
+        (containerWidth / 2 / defaultZoom - mousePointTo.x) * defaultZoom;
+      newX > 0 ? setX(-newX) : setX(newX);
+      // center varticaly
+    } else {
+      const newY =
+        (containerHeight / 2 / defaultZoom - mousePointTo.y) * defaultZoom;
+      newY > 0 ? setY(-newY) : setY(newY);
+    }
+  }, [image, layer, maskLayer]);
 
   // get the last updated cropped image value
   const croppedValue = useMemo(() => {
