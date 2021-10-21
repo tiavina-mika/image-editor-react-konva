@@ -138,7 +138,7 @@ export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
 
     // wheel down = zoom+, wheel up = zoom-
     const newZoom =
-      e.evt.deltaY > 0 ? oldZoom + ZOOM_STEP : oldZoom - ZOOM_STEP;
+      e.evt.deltaY < 0 ? oldZoom + ZOOM_STEP : oldZoom - ZOOM_STEP;
 
     if (newZoom < minZoom || newZoom > ZOOM_MAX) return;
     setZoom(newZoom);
