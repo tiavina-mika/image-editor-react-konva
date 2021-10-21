@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 
 export const ZOOM_STEP = 0.1;
+export const ZOOM_MAX = 3;
 
 /**
  * create another canvas to invert the mask color
@@ -28,7 +29,24 @@ const invertMask = (image) => {
   return canvas;
 };
 
-export const useCropper = ({ image, imageMask, layer }) => {
+const centerZoom = ({ maskLayer, stage, oldZoom, newZoom, imageNode }) => {
+  const containerWidth = maskLayer ? maskLayer.width : stage.width();
+  const containerHeight = maskLayer ? maskLayer.height : stage.width();
+
+  const mousePointTo = {
+    x: containerWidth / 2 / oldZoom - imageNode.x() / oldZoom,
+    y: containerHeight / 2 / oldZoom - imageNode.y() / oldZoom
+  };
+
+  const newX = (containerWidth / 2 / newZoom - mousePointTo.x) * newZoom;
+  const newY = (containerHeight / 2 / newZoom - mousePointTo.y) * newZoom;
+  return {
+    newX,
+    newY
+  };
+};
+
+export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
 
@@ -39,6 +57,7 @@ export const useCropper = ({ image, imageMask, layer }) => {
   // const [imageMask] = useImage(imageMask, "Anonymous");
   const invertedMaskRef = useRef();
   const imageRef = useRef();
+  const stageRef = useRef();
 
   const complete = !!imageMask?.complete;
   useMemo(() => {
@@ -79,28 +98,27 @@ export const useCropper = ({ image, imageMask, layer }) => {
   const onDragEnd = (e) => {
     setX(e.target.x());
     setY(e.target.y());
-    // console.log({ x: e.target.x(), y: e.target.y() });
   };
   // console.log("croppedValue", croppedValue);
 
-  const handleWheel = (e) => {
+  const handleWheelRelativeToPointer = (e) => {
     e.evt.preventDefault();
     const stage = e.target.getStage();
 
     const imageNode = imageRef.current;
-    const imageZoom = imageNode.scaleX();
+    const oldZoom = imageNode.scaleX();
 
     // wheel down = zoom+, wheel up = zoom-
     const newZoom =
-      e.evt.deltaY > 0 ? imageZoom + ZOOM_STEP : imageZoom - ZOOM_STEP;
+      e.evt.deltaY > 0 ? oldZoom + ZOOM_STEP : oldZoom - ZOOM_STEP;
 
     if (newZoom < minZoom) return;
     setZoom(newZoom);
 
     // always center the image when zooming
     const mousePointTo = {
-      x: stage.getPointerPosition().x / imageZoom - imageNode.x() / imageZoom,
-      y: stage.getPointerPosition().y / imageZoom - imageNode.y() / imageZoom
+      x: stage.getPointerPosition().x / oldZoom - imageNode.x() / oldZoom,
+      y: stage.getPointerPosition().y / oldZoom - imageNode.y() / oldZoom
     };
 
     const newX =
@@ -111,8 +129,52 @@ export const useCropper = ({ image, imageMask, layer }) => {
     setY(newY);
   };
 
+  const handleWheel = (e) => {
+    e.evt.preventDefault();
+    const stage = e.target.getStage();
+
+    const imageNode = imageRef.current;
+    const oldZoom = imageNode.scaleX();
+
+    // wheel down = zoom+, wheel up = zoom-
+    const newZoom =
+      e.evt.deltaY > 0 ? oldZoom + ZOOM_STEP : oldZoom - ZOOM_STEP;
+
+    if (newZoom < minZoom || newZoom > ZOOM_MAX) return;
+    setZoom(newZoom);
+
+    const { newX, newY } = centerZoom({
+      maskLayer,
+      stage,
+      oldZoom,
+      newZoom,
+      imageNode
+    });
+
+    setX(newX);
+    setY(newY);
+  };
+
+  const onZoom = (value) => {
+    const stage = stageRef.current;
+
+    const imageNode = imageRef.current;
+    const oldZoom = imageNode.scaleX();
+
+    const { newX, newY } = centerZoom({
+      maskLayer,
+      stage,
+      oldZoom,
+      newZoom: value,
+      imageNode
+    });
+    setX(newX);
+    setY(newY);
+    setZoom(value);
+  };
+
   return {
-    setZoom,
+    onZoom,
     zoom,
     minZoom,
     handleWheel,
@@ -121,6 +183,9 @@ export const useCropper = ({ image, imageMask, layer }) => {
     x,
     y,
     imageRef,
-    invertedMaskRef
+    invertedMaskRef,
+    stageRef,
+    // if needed
+    handleWheelRelativeToPointer
   };
 };

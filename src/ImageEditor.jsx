@@ -6,7 +6,7 @@ import "./style.css";
 import mask from "./mask-circle.png";
 import userImage from "./UI-Lovecraft.jpg";
 import Slider from "./Slider";
-import { useCropper, ZOOM_STEP } from "./hooks/useCropper";
+import { useCropper, ZOOM_MAX, ZOOM_STEP } from "./hooks/useCropper";
 
 const USER_IMAGE_LAYER = {
   width: 624,
@@ -15,7 +15,9 @@ const USER_IMAGE_LAYER = {
 
 const MASK_LAYER = {
   width: 624,
-  height: 591
+  height: 591,
+  left: 0,
+  right: 0
 };
 
 const ImageEditor = () => {
@@ -24,7 +26,7 @@ const ImageEditor = () => {
   const [imageMask] = useImage(mask, "Anonymous");
 
   const {
-    setZoom,
+    onZoom,
     zoom,
     minZoom,
     handleWheel,
@@ -33,10 +35,16 @@ const ImageEditor = () => {
     x,
     y,
     imageRef,
-    invertedMaskRef
-  } = useCropper({ image, imageMask, layer: USER_IMAGE_LAYER });
+    invertedMaskRef,
+    stageRef
+  } = useCropper({
+    image,
+    imageMask,
+    layer: USER_IMAGE_LAYER,
+    maskLayer: MASK_LAYER
+  });
 
-  console.log(croppedValue);
+  // console.log(croppedValue);
   const onMouseEnter = (event) => {
     event.target.getStage().container().style.cursor = "move";
   };
@@ -47,6 +55,7 @@ const ImageEditor = () => {
   return (
     <div className="container flexCenter">
       <Stage
+        ref={stageRef}
         width={USER_IMAGE_LAYER.width}
         height={USER_IMAGE_LAYER.height}
         onWheel={handleWheel}
@@ -84,11 +93,11 @@ const ImageEditor = () => {
       <div className="flexCenter m-t-20 m-b-10">
         <Slider
           step={ZOOM_STEP}
-          onChange={setZoom}
+          onChange={onZoom}
           defaultValue={minZoom}
           value={zoom}
           min={minZoom}
-          max={3}
+          max={ZOOM_MAX}
         />
       </div>
     </div>
