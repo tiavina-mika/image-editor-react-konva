@@ -3,10 +3,10 @@ import { Stage, Layer, Image } from "react-konva";
 import useImage from "use-image";
 
 import "./style.css";
-import mask from "./mask-circle.png";
-// import userImage from "./bmw.png";
-import userImage from "./UI-Lovecraft.jpg";
-// import userImage from "./UI-Goethe.jpg";
+import mask from "./images/mask-circle.png";
+// import userImage from "./images/bmw.png";
+import userImage from "./images/UI-Lovecraft.jpg";
+// import userImage from "./images/UI-Goethe.jpg";
 import Slider from "./Slider";
 import { useCropper, ZOOM_MAX, ZOOM_STEP } from "./hooks/useCropper";
 
