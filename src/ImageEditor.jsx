@@ -3,21 +3,27 @@ import { Stage, Layer, Image } from "react-konva";
 import useImage from "use-image";
 
 import "./style.css";
-import mask from "./images/mask-circle.png";
+import mask from "./images/mask-deformed-circle.png";
+// import mask from "./images/mask-circle.png";
+
 // import userImage from "./images/bmw.png";
-import userImage from "./images/UI-Lovecraft.jpg";
-// import userImage from "./images/UI-Goethe.jpg";
+// import userImage from "./images/UI-Lovecraft.jpg";
+import userImage from "./images/UI-Goethe.jpg";
 import Slider from "./Slider";
 import { useCropper, ZOOM_MAX, ZOOM_STEP } from "./hooks/useCropper";
 
 const USER_IMAGE_LAYER = {
   width: 624,
   height: 591
+  // width: 1162,
+  // height: 1155,
 };
 
 const MASK_LAYER = {
   width: 624,
   height: 591,
+  // width: 1162,
+  // height: 1155,
   left: 0,
   right: 0
 };
@@ -33,7 +39,6 @@ const ImageEditor = () => {
     minZoom,
     handleWheel,
     onDragEnd,
-    croppedValue,
     x,
     y,
     imageRef,
@@ -46,7 +51,6 @@ const ImageEditor = () => {
     maskLayer: MASK_LAYER
   });
 
-  // console.log(croppedValue);
   const onMouseEnter = (event) => {
     event.target.getStage().container().style.cursor = "move";
   };

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 
 export const ZOOM_STEP = 0.1;
-export const ZOOM_MAX = 3;
+export const ZOOM_MAX = 4;
 
 /**
  * create another canvas to invert the mask color
@@ -83,17 +83,17 @@ export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
       x: containerWidth / 2 - image.x,
       y: containerHeight / 2 - image.y
     };
+    console.log("defaultZoom", defaultZoom);
 
     // center horizontaly
     if (image.naturalHeight <= image.naturalWidth) {
-      const newX =
-        (containerWidth / 2 / defaultZoom - mousePointTo.x) * defaultZoom;
+      const newX = (containerWidth / 2 - mousePointTo.x) * defaultZoom;
       newX > 0 ? setX(-newX) : setX(newX);
       // center varticaly
     } else {
-      const newY =
-        (containerHeight / 2 / defaultZoom - mousePointTo.y) * defaultZoom;
+      const newY = (containerHeight / 2 - mousePointTo.y) * defaultZoom;
       newY > 0 ? setY(-newY) : setY(newY);
+      console.log("nnewY", newY);
     }
   }, [image, layer, maskLayer]);
 
@@ -115,7 +115,7 @@ export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
     setX(e.target.x());
     setY(e.target.y());
   };
-  // console.log("croppedValue", croppedValue);
+  console.log("croppedValue", croppedValue);
 
   const handleWheelRelativeToPointer = (e) => {
     e.evt.preventDefault();
