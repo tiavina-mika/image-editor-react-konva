@@ -83,7 +83,6 @@ export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
       x: containerWidth / 2 - image.x,
       y: containerHeight / 2 - image.y
     };
-    console.log("defaultZoom", defaultZoom);
 
     // center horizontaly
     if (image.naturalHeight <= image.naturalWidth) {
@@ -93,7 +92,6 @@ export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
     } else {
       const newY = (containerHeight / 2 - mousePointTo.y) * defaultZoom;
       newY > 0 ? setY(-newY) : setY(newY);
-      console.log("nnewY", newY);
     }
   }, [image, layer, maskLayer]);
 
@@ -115,7 +113,7 @@ export const useCropper = ({ image, imageMask, layer, maskLayer }) => {
     setX(e.target.x());
     setY(e.target.y());
   };
-  console.log("croppedValue", croppedValue);
+  // console.log("croppedValue", croppedValue);
 
   const handleWheelRelativeToPointer = (e) => {
     e.evt.preventDefault();
